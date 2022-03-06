@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import static service.Constants.INV_FOLDER;
 
 public class ParseInvoicesService {
-
+    static double totalHrs = 0;
     File invoicesFolder = new File(INV_FOLDER);
     ParsePdfService parsePdfService = new ParsePdfService();
 
@@ -22,27 +22,28 @@ public class ParseInvoicesService {
         List<String> filesList = getFilesInFolder();
         for (String file : filesList) {
             InvoiceDetails invoiceDetails = parsePdfService.getInvoiceData(parsePdfService.parsePdf(INV_FOLDER + file));
-           if(invoiceDetails!=null) {
-               for (LocalDate date : invoiceDetails.getInvoice().keySet()) {
-                   YearMonth yearMonth = YearMonth.of(date.getYear(), date.getMonth());
-                   monthlyInvoiceList.put(yearMonth, monthlyInvoiceList.getOrDefault(yearMonth, 0.0) + invoiceDetails.getInvoice().get(date));
-                   LocalDate midOfMonth = yearMonth.atDay(15);
-                   if(date.isAfter(midOfMonth)){
-                       semiMonthlyInvoice.put(yearMonth.atEndOfMonth(),semiMonthlyInvoice.getOrDefault(yearMonth.atEndOfMonth(), 0.0) + invoiceDetails.getInvoice().get(date));
-                   }
-                   else{
-                       semiMonthlyInvoice.put(midOfMonth,semiMonthlyInvoice.getOrDefault(midOfMonth, 0.0) + invoiceDetails.getInvoice().get(date));
-                   }
-               }
-           }
+            if (invoiceDetails != null) {
+                for (LocalDate date : invoiceDetails.getInvoice().keySet()) {
+                    YearMonth yearMonth = YearMonth.of(date.getYear(), date.getMonth());
+                    monthlyInvoiceList.put(yearMonth, monthlyInvoiceList.getOrDefault(yearMonth, 0.0) + invoiceDetails.getInvoice().get(date));
+                    LocalDate midOfMonth = yearMonth.atDay(15);
+                    if (date.isAfter(midOfMonth)) {
+                        semiMonthlyInvoice.put(yearMonth.atEndOfMonth(), semiMonthlyInvoice.getOrDefault(yearMonth.atEndOfMonth(), 0.0) + invoiceDetails.getInvoice().get(date));
+                    } else {
+                        semiMonthlyInvoice.put(midOfMonth, semiMonthlyInvoice.getOrDefault(midOfMonth, 0.0) + invoiceDetails.getInvoice().get(date));
+                    }
+                }
+            }
         }
-        System.err.println(monthlyInvoiceList+"\n");
-        System.err.println("semiMonthlyInvoice ---\n"+semiMonthlyInvoice);
+        System.err.println(monthlyInvoiceList + "\n");
+        System.err.println("semiMonthlyInvoice ---\n" + semiMonthlyInvoice);
 
-        List<LocalDate> set =  semiMonthlyInvoice.keySet().stream().collect(Collectors.toList());
+        List<LocalDate> set = semiMonthlyInvoice.keySet().stream().collect(Collectors.toList());
         Collections.sort(set);
-        for(LocalDate date: set){
-            System.out.println(date+" -----> "+semiMonthlyInvoice.get(date)+"hrs -----> "+semiMonthlyInvoice.get(date)*47);
+        for (LocalDate date : set) {
+            totalHrs = totalHrs + semiMonthlyInvoice.get(date);
+            System.out.println(date + " -----> " + semiMonthlyInvoice.get(date) + "hrs -----> " + semiMonthlyInvoice.get(date) * 47);
+            System.out.println(" cummulative sum : --------> " + totalHrs +" --------"+totalHrs*50);
         }
 
         return monthlyInvoiceList;

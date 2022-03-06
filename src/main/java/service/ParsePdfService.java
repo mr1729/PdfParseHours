@@ -1,6 +1,7 @@
 package service;
 
 import model.InvoiceDetails;
+import model.PayStubDetails;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 
@@ -22,6 +23,11 @@ public class ParsePdfService {
 
     static Set<LocalDate> fromDateSet = new HashSet<>();
     public static List<String> abc = new ArrayList<>();
+
+    public PayStubDetails getPayStubData(String text) {
+        return new PayStubDetails();
+    }
+
 
     public InvoiceDetails getInvoiceData(String text) {
 
@@ -65,7 +71,12 @@ public class ParsePdfService {
 2021-06-15 -----> 90.0hrs -----> 4230.0    4230    3266.40
 2021-06-30 -----> 89.0hrs -----> 4183.0    4136    3201.60    - 1 hrs
 2021-07-15 -----> 76.0hrs -----> 3572.0    3384    2673.12    - 4 hrs
-2021-07-31 -----> 44.0hrs -----> 2068.0
+2021-07-31 -----> 84.0hrs -----> 3948.0
+2021-08-15 -----> 80.0hrs -----> 3760.0
+2021-08-31 -----> 98.0hrs -----> 4606.0
+2021-09-15 -----> 78.0hrs -----> 3666.0
+2021-09-30 -----> 88.0hrs -----> 4136.0
+2021-10-15 -----> 48.0hrs -----> 2256.0
        */
         return invoiceDetails;
     }
@@ -84,4 +95,21 @@ public class ParsePdfService {
         }
         return "";
     }
+
+    public String parseEncryptedPdf(String filePath, String password) {
+        File pdfFile = new File(filePath);
+        try {
+            document = PDDocument.load(pdfFile, password);
+            PDFTextStripper textStripper = new PDFTextStripper();
+            document.getPage(0);
+            String result = textStripper.getText(document);
+            document.close();
+            return result;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+
 }
